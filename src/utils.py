@@ -23,7 +23,7 @@ def save_chat_id(chat_id: str) -> None:
         if file_path.is_file() and file_path.suffix == ".chatid":
             os.remove(file_path)
 
-    open(f"{chat_id}.chatid", "w").close()
+    open(f"./src/{chat_id}.chatid", "w").close()
 
 
 def parse_message_dates(message) -> tuple[str]:

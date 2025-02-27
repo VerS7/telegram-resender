@@ -23,8 +23,12 @@ def send_message_callback(bot: telebot.TeleBot, msg: dict[str, str]) -> None:
         print(e)
         return
 
+    chat_id = get_saved_chat_id()
+    if chat_id is None:
+        return
+
     bot.send_message(
-        get_saved_chat_id(),
+        chat_id,
         f"Новое сообщение\n\nТема: {msg['subject']}\nОт: {msg['from']}\n\nДата регистрации: {rd}\nКрайний срок: {dd}",
     )
 
