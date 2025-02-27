@@ -8,6 +8,10 @@ import imaplib
 from email.header import decode_header
 from time import sleep
 
+from loguru import logger
+
+from config import DEFAULT_INBOX
+
 
 def decode_message(message_raw: list) -> dict[str, str]:
     """Декодирует сообщение"""
@@ -37,11 +41,12 @@ class Mailer:
         try:
             self._imap.login(username, password)
         except Exception as e:
+            logger.error("Не удалось подключится к imap: ", e)
             raise e
 
     def get_last_message(self, mailbox_name: str) -> tuple[str, dict[str, str]] | None:
         """Возвращает последнее сообщение из определённого ящика"""
-        self._imap.select(mailbox_name)
+        self._imap.select(mailbox_name, readonly=True)
 
         if self._imap.state != "SELECTED":
             return
@@ -53,7 +58,9 @@ class Mailer:
 
         return mailbox[-1], decode_message(msg)
 
-    def poll(self, delay: int, callback, mailbox_name: str = "info") -> None:
+    def poll(
+        self, delay: int, callback: callable, mailbox_name: str = DEFAULT_INBOX
+    ) -> None:
         """Запрашивает сообщения раз в delay"""
         last_msg_id = 0
 

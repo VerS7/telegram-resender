@@ -7,9 +7,11 @@ from threading import Thread
 import telebot
 from telebot.types import Message
 
+from loguru import logger
+
 from config import TELEGRAM_TOKEN, USERNAME, PASSWORD, IMAP_SERVER, LISTEN_DELAY
 from mail import Mailer
-from utils import get_saved_chat_id, save_chat_id, parse_message_dates
+from utils import get_saved_chat_id, save_chat_id, parse_message_dates, parse_id
 
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
@@ -19,9 +21,9 @@ mailer = Mailer(USERNAME, PASSWORD, IMAP_SERVER)
 def send_message_callback(bot: telebot.TeleBot, msg: dict[str, str]) -> None:
     try:
         rd, dd = parse_message_dates(msg)
+        id = parse_id(msg)
     except Exception as e:
-        print(e)
-        return
+        logger.error("Ошибка при парсинге: ", e)
 
     chat_id = get_saved_chat_id()
     if chat_id is None:
@@ -29,8 +31,10 @@ def send_message_callback(bot: telebot.TeleBot, msg: dict[str, str]) -> None:
 
     bot.send_message(
         chat_id,
-        f"Новое сообщение\n\nТема: {msg['subject']}\nОт: {msg['from']}\n\nДата регистрации: {rd}\nКрайний срок: {dd}",
+        f"**Новое сообщение**\n\nТема: **{msg['subject'].replace(id, f'`{id}`')}**\n\nДата регистрации: **{rd}**\nКрайний срок: **{dd}**",
+        parse_mode="Markdown",
     )
+    logger.info("Отправлено оповещение.")
 
 
 @bot.message_handler(commands=["help"])
@@ -46,9 +50,11 @@ def connect(message: Message):
     if chat_id is None:
         save_chat_id(message.chat.id)
         bot.send_message(message.chat.id, f"Чат с ID: {message.chat.id} подключён!")
+        logger.info("Подключён чат с ID: ", message.chat.id)
         return
 
     bot.send_message(message.chat.id, "Чат уже подключён.")
+    logger.warning("Попытка подключения чата: ", message.chat.id)
 
 
 if __name__ == "__main__":
@@ -58,6 +64,8 @@ if __name__ == "__main__":
             LISTEN_DELAY, lambda msg: send_message_callback(bot, msg)
         )
     )
+
+    logger.info("Запуск...")
 
     bot_thread.start()
     mailer_thread.start()

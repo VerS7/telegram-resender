@@ -28,7 +28,14 @@ def save_chat_id(chat_id: str) -> None:
 
 def parse_message_dates(message) -> tuple[str]:
     """Парсит даты из сообщения"""
-    reg_date = re.search(r"Дата регистрации:\s*<b>(.*?)<\/b>", message["text"]).group(1)
-    dln_date = re.search(r"Крайний срок:\s*<b>(.*?)<\/b>", message["text"]).group(1)
+    reg_date = re.search(r"Дата регистрации:\s*<[bB]>(.*?)<\/[bB]>", message["text"])
+    dln_date = re.search(r"Крайний срок:\s*<[bB]>(.*?)<\/[bB]>", message["text"])
 
-    return reg_date, dln_date
+    return reg_date.group(1), dln_date.group(1)
+
+
+def parse_id(message) -> str:
+    """Парсит ID обращения из сообщения"""
+    id = re.search(r"№\s*([A-Za-z]+\d+)", message["subject"])
+
+    return id.group(1)
