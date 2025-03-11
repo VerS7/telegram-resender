@@ -28,18 +28,23 @@ def save_chat_id(chat_id: str) -> None:
 
 def parse_message_dates(message) -> tuple[str]:
     """Парсит даты из сообщения"""
-    reg_date = re.search(
-        r"Дата регистрации:\s*<([bB]|strong)>(.*?)<\/([bB]|strong)>", message["text"]
-    )
-    dln_date = re.search(
-        r"Крайний срок:\s*<([bB]|strong)>(.*?)<\/([bB]|strong)>", message["text"]
-    )
+    reg_str = re.search(
+        r"<(BR|br)>Дата регистрации:\s*(<([bB]|strong)>)?(.*?)(<\/([bB]|strong)>)?<(BR|br)>",
+        message["text"],
+    ).group()
+    reg_date = re.search(r"(\d{2}/\d{2}/\d{2} \d{2}:\d{2}:\d{2})", reg_str)
 
-    return reg_date.group(2), dln_date.group(2)
+    dln_str = re.search(
+        r"<(BR|br)>Крайний срок:\s*(<([bB]|strong)>)?(.*?)(<\/([bB]|strong)>)?<(BR|br)>",
+        message["text"],
+    ).group()
+    dln_date = re.search(r"(\d{2}/\d{2}/\d{2} \d{2}:\d{2}:\d{2})", dln_str)
+
+    return reg_date.group(), dln_date.group()
 
 
 def parse_id(message) -> str:
     """Парсит ID обращения из сообщения"""
-    id = re.search(r"№\s*([A-Za-z]+\d+)", message["subject"])
+    id = re.search(r"(№)?\s*([A-Za-z]+\d+)", message["subject"])
 
-    return id.group(1)
+    return id.group().strip().replace("№", "")

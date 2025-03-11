@@ -20,18 +20,28 @@ mailer = Mailer(USERNAME, PASSWORD, IMAP_SERVER)
 
 def send_message_callback(bot: telebot.TeleBot, msg: dict[str, str]) -> None:
     try:
-        rd, dd = parse_message_dates(msg)
         id = parse_id(msg)
     except Exception as e:
-        logger.error("Ошибка при парсинге: ", e)
+        logger.error("Ошибка при парсинге ID обращения: ", e)
+
+    try:
+        rd, dd = parse_message_dates(msg)
+    except Exception as e:
+        logger.error("Ошибка при парсинге сроков: ", e)
 
     chat_id = get_saved_chat_id()
     if chat_id is None:
         return
 
+    message = (
+        f"**Новое сообщение**\n\nТема: **{msg['subject'].replace(id, f'`{id}`')}**\n\nДата регистрации: **{rd}**\nКрайний срок: **{dd}**"
+        if (rd is not None and dd is not None)
+        else f"**Новое сообщение**\n\nТема: **{msg['subject'].replace(id, f'`{id}`')}**"
+    )
+
     bot.send_message(
         chat_id,
-        f"**Новое сообщение**\n\nТема: **{msg['subject'].replace(id, f'`{id}`')}**\n\nДата регистрации: **{rd}**\nКрайний срок: **{dd}**",
+        message,
         parse_mode="Markdown",
     )
     logger.info("Отправлено оповещение.")
