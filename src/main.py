@@ -24,14 +24,17 @@ def send_message_callback(bot: telebot.TeleBot, msg: dict[str, str]) -> None:
     except Exception as e:
         logger.error("Ошибка при парсинге ID обращения: ", e)
 
-    try:
-        rd, dd = parse_message_dates(msg)
-    except Exception as e:
-        logger.error("Ошибка при парсинге сроков: ", e)
-
     chat_id = get_saved_chat_id()
     if chat_id is None:
         return
+
+    rd, dd = None, None
+    try:
+        rd, dd = parse_message_dates(msg)
+    except Exception:
+        logger.warning(
+            "Ошибка при парсинге сроков. Возможно они отсутствуют в обращении."
+        )
 
     message = (
         f"**Новое сообщение**\n\nТема: **{msg['subject'].replace(id, f'`{id}`')}**\n\nДата регистрации: **{rd}**\nКрайний срок: **{dd}**"
