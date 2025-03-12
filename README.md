@@ -107,11 +107,11 @@ python run.py
 Windows
 
 ```sh
-    run-py.bat
+run-py.bat
 ```
 
 Linux
 
 ```sh
-    source run-py.sh
+source run-py.sh
 ```
