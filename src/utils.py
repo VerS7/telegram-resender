@@ -35,7 +35,7 @@ def parse_message_dates(message) -> tuple[str]:
     reg_date = re.search(r"(\d{2}/\d{2}/\d{2} \d{2}:\d{2}:\d{2})", reg_str)
 
     dln_str = re.search(
-        r"<(BR|br)>Крайний срок:\s*(<([bB]|strong)>)?(.*?)(<\/([bB]|strong)>)?<(BR|br)>",
+        r"<(BR|br)?>Крайний срок:\s*(<([bB]|strong)>)?(.*?)(<\/([bB]|strong)>)?<(BR|br)?>",
         message["text"],
     ).group()
     dln_date = re.search(r"(\d{2}/\d{2}/\d{2} \d{2}:\d{2}:\d{2})", dln_str)

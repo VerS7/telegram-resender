@@ -37,12 +37,27 @@ class Mailer:
     """Класс для работы с почтой"""
 
     def __init__(self, username: str, password: str, imap_server: str) -> None:
-        self._imap = imaplib.IMAP4_SSL(imap_server)
+        self._imap_server = imap_server
+        self._username = username
+        self._password = password
+        self._imap = None
+        self.is_active = False
         try:
-            self._imap.login(username, password)
+            self.login()
+            logger.info("Успешное подключение к email")
         except Exception as e:
             logger.error("Не удалось подключится к imap: ", e)
             raise e
+
+    def stop(self):
+        """Останавливает бота"""
+        self.is_active = False
+        self._imap.logout()
+        self._imap.close()
+
+    def login(self):
+        self._imap = imaplib.IMAP4_SSL(self._imap_server)
+        self._imap.login(self._username, self._password)
 
     def get_last_message(self, mailbox_name: str) -> tuple[str, dict[str, str]] | None:
         """Возвращает последнее сообщение из определённого ящика"""
@@ -62,9 +77,15 @@ class Mailer:
         self, delay: int, callback: callable, mailbox_name: str = DEFAULT_INBOX
     ) -> None:
         """Запрашивает сообщения раз в delay"""
+        self.is_active = True
+
         last_msg_id = 0
 
-        while True:
+        logger.debug(
+            f"Номер последнего сообщения: {self.get_last_message(mailbox_name)[0]}"
+        )
+
+        while self.is_active:
             msgr = self.get_last_message(mailbox_name)
             mid = None
             msg = None

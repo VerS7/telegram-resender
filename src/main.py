@@ -70,18 +70,32 @@ def connect(message: Message):
     logger.warning("Попытка подключения чата: ", message.chat.id)
 
 
-if __name__ == "__main__":
-    bot_thread = Thread(target=lambda: bot.polling(non_stop=True, interval=0))
-    mailer_thread = Thread(
-        target=lambda: mailer.poll(
-            LISTEN_DELAY, lambda msg: send_message_callback(bot, msg)
+def run():
+    try:
+        bot_thread = Thread(
+            target=lambda: logger.info("Telegram BOT запущен")
+            and bot.polling(interval=0)
         )
-    )
+        mailer_thread = Thread(
+            target=lambda: mailer.poll(
+                LISTEN_DELAY, lambda msg: send_message_callback(bot, msg)
+            )
+        )
 
-    logger.info("Запуск...")
+        bot_thread.start()
+        mailer_thread.start()
 
-    bot_thread.start()
-    mailer_thread.start()
+        logger.info("Запуск...")
 
-    bot_thread.join()
-    mailer_thread.join()
+        bot_thread.join()
+        mailer_thread.join()
+    except Exception as e:
+        logger.error("Ошибка при работе: ", e)
+        mailer.stop()
+        logger.info("Попытка перезапуска...")
+        mailer.login()
+        run()
+
+
+if __name__ == "__main__":
+    run()
