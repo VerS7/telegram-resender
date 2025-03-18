@@ -2,7 +2,9 @@
 Telegram bot
 """
 
+import time
 from threading import Thread
+
 
 import telebot
 from telebot.types import Message
@@ -16,6 +18,11 @@ from utils import get_saved_chat_id, save_chat_id, parse_message_dates, parse_id
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 mailer = Mailer(USERNAME, PASSWORD, IMAP_SERVER)
+
+logger.add(
+    "app.log",
+    rotation="1 MB",
+)
 
 
 def send_message_callback(bot: telebot.TeleBot, msg: dict[str, str]) -> None:
@@ -74,12 +81,14 @@ def run():
     try:
         bot_thread = Thread(
             target=lambda: logger.info("Telegram BOT запущен")
-            and bot.polling(interval=0)
+            and bot.polling(interval=0),
+            name="Telegram BOT",
         )
         mailer_thread = Thread(
             target=lambda: mailer.poll(
                 LISTEN_DELAY, lambda msg: send_message_callback(bot, msg)
-            )
+            ),
+            name="Mailer",
         )
 
         bot_thread.start()
@@ -92,7 +101,8 @@ def run():
     except Exception as e:
         logger.error("Ошибка при работе: ", e)
         mailer.stop()
-        logger.info("Попытка перезапуска...")
+        logger.info("Попытка перезапуска через 5 секунд...")
+        time.sleep(5)
         mailer.login()
         run()
 

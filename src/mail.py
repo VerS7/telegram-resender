@@ -44,26 +44,29 @@ class Mailer:
         self.is_active = False
         try:
             self.login()
-            logger.info("Успешное подключение к email")
+            logger.info("Успешное подключение к imap")
         except Exception as e:
             logger.error("Не удалось подключится к imap: ", e)
+            self.stop()
             raise e
 
     def stop(self):
         """Останавливает бота"""
         self.is_active = False
         self._imap.logout()
-        self._imap.close()
 
     def login(self):
         self._imap = imaplib.IMAP4_SSL(self._imap_server)
-        self._imap.login(self._username, self._password)
+        status, _ = self._imap.login(self._username, self._password)
+        if status != "OK":
+            raise ConnectionError("Не удалось подключиться к imap.")
 
     def get_last_message(self, mailbox_name: str) -> tuple[str, dict[str, str]] | None:
         """Возвращает последнее сообщение из определённого ящика"""
-        self._imap.select(mailbox_name, readonly=True)
+        status, _ = self._imap.select(mailbox_name, readonly=True)
 
-        if self._imap.state != "SELECTED":
+        if status != "OK" or self._imap.state != "SELECTED":
+            logger.error("Не удалось получить последнее сообщение.")
             return
 
         _, mailbox = self._imap.search(None, "ALL")
