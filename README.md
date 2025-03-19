@@ -78,40 +78,48 @@ Linux
 .venv/bin/python src/main.py
 ```
 
-### run.sh | run.bat
-
-Для запуска используется скрипт
-
-Windows
-
-```sh
-run.bat
-```
-
-Linux
-
-```sh
-source run.sh
-```
-
 ### Кастомная система запуска
 
 Для запуска используется **py**-скрипт. Устанавливать зависимости не нужно, всё установится само.
 
+Запуск приложения
+
 ```sh
-python run.py
+python run.py app
+```
+
+Обновление приложения с **github**
+
+```sh
+python run.py update
 ```
 
 ### Альтернатива кастомной системе через batch | shell скрипты
 
 Windows
 
+Запуск приложения
+
 ```sh
-run-py.bat
+run.bat
+```
+
+Обновление приложения с **github**
+
+```sh
+update.bat
 ```
 
 Linux
 
+Запуск приложения
+
 ```sh
-source run-py.sh
+source run.sh
+```
+
+Обновление приложения с **github**
+
+```sh
+source update.sh
 ```
