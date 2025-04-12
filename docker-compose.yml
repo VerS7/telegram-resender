@@ -1,0 +1,9 @@
+services:
+    resender:
+        image: tgrs-bot:latest
+        container_name: tgrs-bot
+        restart: always
+        build:
+            context: .
+        volumes:
+            - ./state:/app/state

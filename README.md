@@ -16,47 +16,52 @@
 
 ## Настройка
 
-Для настройки необходимо заполнить **src/config.py**
+Для настройки необходимо заполнить **template.env** и переименовать в **.env** в директории **state**
 
 ```python
 # Mail
-PASSWORD = "..."
-USERNAME = "..."
-IMAP_SERVER = "..."
-DEFAULT_INBOX = "INBOX"
-LISTEN_DELAY = 5  # Задержка на запрос в секундах
+TGRS_PASSWORD = "..."
+TGRS_USERNAME = "..."
+TGRS_IMAP_SERVER = "..."
+TGRS_DEFAULT_INBOX = "INBOX"
+TGRS_LISTEN_DELAY = 5  # Задержка на запрос в секундах
 
 # Telegram
-TELEGRAM_TOKEN = "..."
+TGRS_TOKEN = "..."
+
 ```
 
--   **PASSWORD**
+-   **TGRS_PASSWORD**
 
     -   Пароль приложения от почтового сервиса (Зачастую пароль пользователя использовать нельзя). Пример с **mail.ru** можно посмотреть **[тут](https://help.mail.ru/mail/mailer/popsmtp/)**.
 
--   **USERNAME**
+-   **TGRS_USERNAME**
 
     -   Адрес электронной почты. Пример: **`example@mail.ru`**.
 
--   **IMAP_SERVER**
+-   **TGRS_IMAP_SERVER**
 
     -   **imap**-домен почтового сервиса.
 
--   **DEFAULT_INBOX**
+-   **TGRS_DEFAULT_INBOX**
 
     -   Почтовый ящик, из которого будут тянуться сообщения. По умолчанию **INBOX** - входящие.
 
--   **LISTEN_DELAY**
+-   **TGRS_LISTEN_DELAY**
 
     -   Задержка запроса последнего сообщения в секундах.
 
--   **TELEGRAM_TOKEN**
+-   **TGRS_TOKEN**
 
     -   Токен приложения **Telegram**, полученный через **@BotFather**.
 
 ## Запуск
 
-Есть несколько способов запуска
+### Docker compose
+
+```sh
+docker compose up -d
+```
 
 ### Only Python
 
