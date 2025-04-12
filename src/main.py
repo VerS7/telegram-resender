@@ -2,16 +2,22 @@
 Telegram bot
 """
 
-import time
 from threading import Thread
-
+from os import path
 
 import telebot
 from telebot.types import Message
 
 from loguru import logger
 
-from config import TELEGRAM_TOKEN, USERNAME, PASSWORD, IMAP_SERVER, LISTEN_DELAY
+from config import (
+    TELEGRAM_TOKEN,
+    USERNAME,
+    PASSWORD,
+    IMAP_SERVER,
+    LISTEN_DELAY,
+    STATE_PATH,
+)
 from mail import Mailer
 from utils import get_saved_chat_id, save_chat_id, parse_message_dates, parse_id
 
@@ -20,7 +26,7 @@ bot = telebot.TeleBot(TELEGRAM_TOKEN)
 mailer = Mailer(USERNAME, PASSWORD, IMAP_SERVER)
 
 logger.add(
-    "app.log",
+    path.join(STATE_PATH, "app.log"),
     rotation="1 MB",
 )
 
@@ -77,35 +83,26 @@ def connect(message: Message):
     logger.warning("Попытка подключения чата: ", message.chat.id)
 
 
-def run():
-    try:
-        bot_thread = Thread(
-            target=lambda: logger.info("Telegram BOT запущен")
-            and bot.polling(interval=0),
-            name="Telegram BOT",
-        )
-        mailer_thread = Thread(
-            target=lambda: mailer.poll(
-                LISTEN_DELAY, lambda msg: send_message_callback(bot, msg)
-            ),
-            name="Mailer",
-        )
+def main():
+    bot_thread = Thread(
+        target=lambda: logger.info("Telegram BOT запущен") and bot.polling(),
+        name="Telegram BOT",
+    )
+    mailer_thread = Thread(
+        target=lambda: mailer.poll(
+            LISTEN_DELAY, lambda msg: send_message_callback(bot, msg)
+        ),
+        name="Mailer",
+    )
 
-        bot_thread.start()
-        mailer_thread.start()
+    bot_thread.start()
+    mailer_thread.start()
 
-        logger.info("Запуск...")
+    logger.info("Запуск...")
 
-        bot_thread.join()
-        mailer_thread.join()
-    except Exception as e:
-        logger.error("Ошибка при работе: ", e)
-        mailer.stop()
-        logger.info("Попытка перезапуска через 5 секунд...")
-        time.sleep(5)
-        mailer.login()
-        run()
+    bot_thread.join()
+    mailer_thread.join()
 
 
 if __name__ == "__main__":
-    run()
+    main()

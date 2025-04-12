@@ -11,6 +11,7 @@ from time import sleep
 from loguru import logger
 
 from config import DEFAULT_INBOX
+from utils import get_saved_last_email_id, save_last_email_id
 
 
 def decode_message(message_raw: list) -> dict[str, str]:
@@ -82,7 +83,7 @@ class Mailer:
         """Запрашивает сообщения раз в delay"""
         self.is_active = True
 
-        last_msg_id = 0
+        last_msg_id = get_saved_last_email_id()
 
         logger.debug(
             f"Номер последнего сообщения: {self.get_last_message(mailbox_name)[0]}"
@@ -98,6 +99,7 @@ class Mailer:
                 msg = msgr[1]
 
             if last_msg_id != mid:
+                save_last_email_id(mid)
                 last_msg_id = mid
                 callback(msg)
 
