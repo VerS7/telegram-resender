@@ -33,6 +33,10 @@ def get_saved_chat_id() -> str | None:
 
 def save_chat_id(chat_id: str) -> None:
     """Сохраняет chat id как файл в текущей директории"""
+    _saved_chat_id = get_saved_chat_id()
+    if _saved_chat_id is not None:
+        os.remove(os.path.join(STATE_PATH, _saved_chat_id + ".chatid"))
+
     _save_state_to_fs(chat_id, ".chatid")
 
 
@@ -41,9 +45,13 @@ def get_saved_last_email_id() -> str | None:
     return _get_state_from_fs(".emailid")
 
 
-def save_last_email_id(chat_id: str) -> None:
+def save_last_email_id(email_id: str) -> None:
     """Сохраняет id последнего email как файл в текущей директории"""
-    _save_state_to_fs(chat_id, ".emailid")
+    _saved_email_id = get_saved_last_email_id()
+    if _saved_email_id is not None:
+        os.remove(os.path.join(STATE_PATH, _saved_email_id + ".emailid"))
+
+    _save_state_to_fs(email_id, ".emailid")
 
 
 def parse_message_regdate(message: str) -> str:
